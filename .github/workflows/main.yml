@@ -26,6 +26,6 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          docker build -t interstellar .
-          docker tag interstellar:latest 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar_repo:latest
+          docker build -t interstellar_repo .
+          docker tag interstellar_repo:latest 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar_repo:latest
           docker push 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar_repo:latest

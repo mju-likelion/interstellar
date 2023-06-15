@@ -20,6 +20,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Build, tag, and push image to Amazon ECR
         run: |
           docker build -t 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar-image:prod-${{github.sha}} .

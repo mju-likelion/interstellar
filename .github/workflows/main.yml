@@ -26,5 +26,5 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          "docker build -t 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar-image:prod-${{github.sha}} ."
-          "docker push 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar-image:prod-${{github.sha}}"
+          docker build -t 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar-image:prod_${{github.sha}} .
+          docker push 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar-image:prod_${{github.sha}}

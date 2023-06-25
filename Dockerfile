@@ -6,8 +6,9 @@ COPY package.json yarn.lock ./
 RUN yarn global add @nestjs/cli
 
 COPY . .
+
 RUN yarn --prod
-    
+
 RUN yarn build
 
 FROM node:18.16.0-alpine

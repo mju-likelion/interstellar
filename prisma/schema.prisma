@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// 여기에 모델들 정의하시면 됩니다.
+
+// 정의 완료 후 'yarn prisma migrate dev' 명령 입력하셔서 migrate 진행하시면 됩니다.
+model Room {
+  code      String  @id @default(uuid())
+  dates     String
+  dateOnly  Boolean
+  startTime String?
+  endTime   String?
+  users     User[]
+}
+
+model User {
+  id          String @id @default(uuid())
+  username    String @unique
+  password    String
+  enableTimes String
+  room        Room   @relation(fields: [roomId], references: [code])
+  roomId      String
+}
+
+// 위의 코드에서 Room 모델에서 users 필드가 추가되었으며, User 모델에서는 room 필드를 옵셔널한 관계로 수정하였습니다.

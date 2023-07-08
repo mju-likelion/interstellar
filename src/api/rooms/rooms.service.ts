@@ -1,14 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Room } from '@prisma/client';
+import { customAlphabet } from 'nanoid';
+
+import { PrismaService } from '@/prisma/prisma.service';
 
 import { CreateRoomDto } from './dto/create-room.dto';
 
+const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6);
+
 @Injectable()
 export class RoomsService {
+  constructor(private readonly prismaService: PrismaService) {}
+
   /**
    * 이 부분 상세 조건들은 아래 슬랙을 참고하시면 좋습니다
    * @see {@link https://www.notion.so/likelion-11th/6-6-8fdfd4c7268e4f70bd232dcee5078aab?pvs=4#ca12b4cd60904410bbb83549e748f1cd | Notion}
    */
-  create(createRoomDto: CreateRoomDto) {
+  async create(createRoomDto: CreateRoomDto): Promise<Room> {
     const errors = [];
 
     const dates = createRoomDto.dates.split(',');
@@ -64,7 +72,13 @@ export class RoomsService {
       throw new BadRequestException(errors);
     }
 
-    return 'This action adds a new room';
+    return this.prismaService.room.create({
+      data: {
+        ...createRoomDto,
+        code: nanoid(),
+        dateOnly: createRoomDto.dateOnly || false,
+      },
+    });
   }
 
   findOne(id: string) {

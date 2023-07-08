@@ -21,7 +21,7 @@ export class RoomsService {
       errors.push('중복된 날짜가 있습니다.');
     }
 
-    const sortedDates = dates.sort();
+    const sortedDates = [...dates].sort();
     if (dates.join(',') !== sortedDates.join(',')) {
       errors.push('날짜는 순서대로 입력되어야 합니다.');
     }
@@ -35,7 +35,7 @@ export class RoomsService {
       (lastDate.getMonth() + 1)
     ).slice(-2)}-${('0' + lastDate.getDate()).slice(-2)}`;
     if (sortedDates.at(-1) > lastDateString) {
-      errors.push('예약 가능한 날짜는 최대 60일입니다.');
+      errors.push('예약 최대 가능 일자는 6개월입니다.');
     }
 
     if (

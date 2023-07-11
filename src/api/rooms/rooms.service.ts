@@ -21,17 +21,17 @@ export class RoomsService {
 
     const dates = createRoomDto.dates.split(',');
     if (dates.length < 1 || dates.length > 60) {
-      errors.push('예약 가능한 날짜는 최소 1일, 최대 60일입니다.');
+      errors.push('dates must be between 1 and 60');
     }
 
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
-      errors.push('중복된 날짜가 있습니다.');
+      errors.push('dates must be unique');
     }
 
     const sortedDates = [...dates].sort();
     if (dates.join(',') !== sortedDates.join(',')) {
-      errors.push('날짜는 순서대로 입력되어야 합니다.');
+      errors.push('dates must be sorted');
     }
 
     const today = new Date(
@@ -43,21 +43,23 @@ export class RoomsService {
       (lastDate.getMonth() + 1)
     ).slice(-2)}-${('0' + lastDate.getDate()).slice(-2)}`;
     if (sortedDates.at(-1) > lastDateString) {
-      errors.push('예약 최대 가능 일자는 6개월입니다.');
+      errors.push('dates must be within 6 months');
     }
 
     if (
       !createRoomDto.dateOnly &&
       (!createRoomDto.startTime || !createRoomDto.endTime)
     ) {
-      errors.push('dateOnly가 false인 경우 startTime과 endTime은 필수입니다.');
+      errors.push('startTime and endTime are required when dateOnly is false');
     }
 
     if (
       createRoomDto.dateOnly &&
       (createRoomDto.startTime || createRoomDto.endTime)
     ) {
-      errors.push('dateOnly가 true인 경우 startTime과 endTime은 필수입니다.');
+      errors.push(
+        'startTime and endTime are not allowed when dateOnly is true'
+      );
     }
 
     if (
@@ -65,7 +67,7 @@ export class RoomsService {
       createRoomDto.endTime &&
       createRoomDto.startTime > createRoomDto.endTime
     ) {
-      errors.push('startTime이 endTime보다 빠른 시간이어야 합니다.');
+      errors.push('startTime must be earlier than endTime');
     }
 
     if (errors.length > 0) {

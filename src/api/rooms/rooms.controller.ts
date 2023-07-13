@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { GetRoomReservationParamDto } from './dto/get-room-reservation-param.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -13,7 +14,7 @@ export class RoomsController {
   }
 
   @Get(':code')
-  getRoomReservation(@Param('code') code: string) {
+  getRoomReservation(@Param() { code }: GetRoomReservationParamDto) {
     return this.roomsService.getRoomReservation(code);
   }
 

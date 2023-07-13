@@ -83,15 +83,15 @@ export class RoomsService {
     });
   }
 
-  findOne(id: string) {
-    return `This action returns a ${id} room`;
+  findOne(code: string) {
+    return `This action returns a ${code} room`;
   }
 
-  getRoomReservation(id: string) {
-    return `This action returns a ${id} room reservation`;
+  getRoomReservation(code: string) {
+    return `This action returns a ${code} room reservation`;
   }
 
-  getRoomSummary(id: string) {
-    return `This action returns a ${id} room summary`;
+  getRoomSummary(code: string) {
+    return `This action returns a ${code} room summary`;
   }
 }

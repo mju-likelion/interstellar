@@ -12,13 +12,13 @@ export class RoomsController {
     return this.roomsService.create(createRoomDto);
   }
 
-  @Get(':id')
-  getRoomReservation(@Param('id') id: string) {
-    return this.roomsService.getRoomReservation(id);
+  @Get(':code')
+  getRoomReservation(@Param('code') code: string) {
+    return this.roomsService.getRoomReservation(code);
   }
 
-  @Get(':id/summary')
-  getRoomSummary(@Param('id') id: string) {
-    return this.roomsService.getRoomSummary(id);
+  @Get(':code/summary')
+  getRoomSummary(@Param('code') code: string) {
+    return this.roomsService.getRoomSummary(code);
   }
 }

@@ -16,7 +16,7 @@ datasource db {
 
 // 정의 완료 후 'yarn prisma migrate dev' 명령 입력하셔서 migrate 진행하시면 됩니다.
 model Room {
-  code      String  @id @default(uuid())
+  code      String  @id
   dates     String
   dateOnly  Boolean
   startTime String?

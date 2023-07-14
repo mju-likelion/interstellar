@@ -50,6 +50,13 @@ module.exports = {
           'sibling',
           'index',
         ],
+        pathGroups: [
+          {
+            pattern: '@/**',
+            group: 'internal',
+            position: 'after',
+          },
+        ],
         'newlines-between': 'always',
       },
     ],

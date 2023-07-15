@@ -87,8 +87,10 @@ export class RoomsService {
     return `This action returns a ${code} room`;
   }
 
-  getRoomReservation(code: string) {
-    return `This action returns a ${code} room reservation`;
+  async getRoomReservation(code: string): Promise<Room> {
+    return this.prismaService.room.findUnique({
+      where: { code },
+    });
   }
 
   getRoomSummary(code: string) {

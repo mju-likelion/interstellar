@@ -14,8 +14,8 @@ export class RoomsController {
   }
 
   @Get(':code')
-  getRoomReservation(@Param() { code }: GetRoomReservationParamDto) {
-    return this.roomsService.getRoomReservation(code);
+  findOne(@Param() { code }: GetRoomReservationParamDto) {
+    return this.roomsService.findOne(code);
   }
 
   @Get(':code/summary')

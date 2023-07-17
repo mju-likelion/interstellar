@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { GetRoomReservationParamDto } from './dto/get-room-reservation-param.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -12,13 +13,13 @@ export class RoomsController {
     return this.roomsService.create(createRoomDto);
   }
 
-  @Get(':id')
-  getRoomReservation(@Param('id') id: string) {
-    return this.roomsService.getRoomReservation(id);
+  @Get(':code')
+  findOne(@Param() { code }: GetRoomReservationParamDto) {
+    return this.roomsService.findOne(code);
   }
 
-  @Get(':id/summary')
-  getRoomSummary(@Param('id') id: string) {
-    return this.roomsService.getRoomSummary(id);
+  @Get(':code/summary')
+  getRoomSummary(@Param('code') code: string) {
+    return this.roomsService.getRoomSummary(code);
   }
 }

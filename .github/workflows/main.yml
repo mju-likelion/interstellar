@@ -1,4 +1,4 @@
-name: Deploy to ECR
+name: CI/CD
 
 on:
   push:
@@ -27,5 +27,27 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         run: |
           docker build -t interstellar_repo .
-          docker tag interstellar_repo:latest 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar_repo:latest
-          docker push 927324147006.dkr.ecr.ap-northeast-2.amazonaws.com/interstellar_repo:latest
+          docker tag interstellar_repo:latest ${{secrets.ECR_IMAGE_URI}}:latest
+          docker push ${{secrets.ECR_IMAGE_URI}}:latest
+  deploy:
+    needs: build
+    name: CD
+    runs-on: self-hosted
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull image from Amazon ECR and restart container
+        run: |
+          docker pull ${{secrets.ECR_IMAGE_URI}}:latest
+          docker stop interstellar && docker rm interstellar
+          docker run -d --env-file ./.env --name interstellar -p 3000:3000 --restart unless-stopped ${{secrets.ECR_IMAGE_URI}}:latest

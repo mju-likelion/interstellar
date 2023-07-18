@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Room } from '@prisma/client';
 import { customAlphabet } from 'nanoid';
 
@@ -84,9 +88,15 @@ export class RoomsService {
   }
 
   async findOne(code: string): Promise<Room> {
-    return this.prismaService.room.findUnique({
+    const room = this.prismaService.room.findUnique({
       where: { code },
     });
+
+    if (!room) {
+      throw new NotFoundException(`Room with code ${code} not found`);
+    }
+
+    return room;
   }
 
   getRoomSummary(code: string) {

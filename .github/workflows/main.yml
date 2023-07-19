@@ -50,5 +50,5 @@ jobs:
       - name: Pull image from Amazon ECR and restart container
         run: |
           sudo docker pull ${{secrets.ECR_IMAGE_URI}}:latest
-          sudo docker stop interstellar && docker rm interstellar
+          sudo docker stop interstellar && sudo docker rm interstellar
           sudo docker run -d --env-file ./.env --name interstellar -p 3000:3000 --restart unless-stopped ${{secrets.ECR_IMAGE_URI}}:latest

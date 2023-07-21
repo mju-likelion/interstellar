@@ -1,18 +1,12 @@
 import { Transform } from 'class-transformer';
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  Matches,
-  ValidateIf,
-} from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
 
 export class CreateAppointmentDto {
   @IsString()
   roomCode: string;
 
   @IsString()
-  userName: string;
+  username: string;
 
   @Transform(({ value }) => value.trim())
   @IsString()
@@ -23,8 +17,6 @@ export class CreateAppointmentDto {
   @IsBoolean()
   dateOnly?: boolean;
 
-  // @Transform(({ value }) => value.split(',').map(date => date.trim()))
   @IsString({ each: true })
-  // @Matches(/^(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?,?)+$/)
   dates: string[];
 }

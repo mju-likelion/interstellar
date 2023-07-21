@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { hash } from 'bcrypt';
+import { User } from '@prisma/client';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
 import { AuthService } from '../auth/auth.service';
+import { RoomsService } from '../rooms/rooms.service';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,30 +17,22 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly roomService: RoomsService,
     private authService: AuthService
   ) {}
-  async createAppointement(createAppointmentDto: CreateAppointmentDto) {
-    const errors = [];
-    const { roomCode, userName, password, dates, dateOnly } =
+  async createAppointment(createAppointmentDto: CreateAppointmentDto) {
+    const errors400 = [];
+    const errors404 = [];
+    const { roomCode, username, password, dates, dateOnly } =
       createAppointmentDto;
 
-    if (
-      !(await this.prismaService.room.findUnique({ where: { code: roomCode } }))
-    ) {
-      errors.push('Room does not exist');
+    if (await this.findOne(username)) {
+      errors400.push('Username already exists');
     }
 
-    if (await this.prismaService.user.findUnique({ where: { userName } })) {
-      //userName 중복 확인
-      errors.push('Username already exists');
-    }
-
-    const hashedPassword = await hash(password, 10);
-    const token = this.authService.login(userName, password);
-    console.log(token);
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
-      errors.push('dates must be unique');
+      errors400.push('dates must be unique');
     }
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며 
@@ -44,7 +42,7 @@ export class UsersService {
       for (const date of dates) {
         const [_, selectedTime] = date.split(' ');
         if (!selectedTime) {
-          errors.push('Time must be selected when dateOnly is false');
+          errors400.push('Time must be selected when dateOnly is false');
           break;
         }
       }
@@ -52,27 +50,44 @@ export class UsersService {
 
     const sortedDates = dates.sort();
     if (dates.join(',') !== sortedDates.join(',')) {
-      errors.push('dates must be sorted');
+      errors400.push('dates must be sorted');
     }
 
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
+    if (errors400.length > 0) {
+      throw new BadRequestException(errors400);
     }
 
-    await this.prismaService.user.create({
-      data: {
-        userName,
-        password: hashedPassword,
-        enableTimes: dates,
-        roomId: roomCode,
-      },
-    });
+    if (!(await this.roomService.findOne(roomCode))) {
+      errors404.push('Room does not exist');
+    }
+
+    const hashedPassword = await hash(password, 10);
+    const token = this.authService.login(username, password);
+
+    if (errors404.length > 0) {
+      throw new NotFoundException(errors404);
+    }
+
+    try {
+      await this.prismaService.user.create({
+        data: {
+          username,
+          password: hashedPassword,
+          enableTimes: dates,
+          roomId: roomCode,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
 
     return token;
   }
 
-  findUsersByRoom(roomId: number) {
-    return `This action returns all users by room id ${roomId}`;
+  findOne(username: string): Promise<User> {
+    return this.prismaService.user.findUnique({
+      where: { username },
+    });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

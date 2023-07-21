@@ -26,7 +26,7 @@ model Room {
 
 model User {
   id          String @id @default(uuid())
-  userName    String @unique
+  username    String @unique
   password    String
   enableTimes String[]
   room        Room   @relation(fields: [roomId], references: [code])

@@ -6,11 +6,6 @@ import { compare } from 'bcrypt';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
-interface User {
-  userName: string;
-  password: string;
-}
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -29,9 +24,9 @@ export class AuthService {
     };
   }
 
-  async validateUser(userName: string, password: string) {
+  async validateUser(username: string, password: string) {
     const user = await this.prismaService.user.findUnique({
-      where: { userName },
+      where: { username },
     });
 
     if (!user || (user && !compare(password, user.password))) return null;

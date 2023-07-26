@@ -44,10 +44,11 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        run: |
+          aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.ap-northeast-2.amazonaws.com
 
       - name: Pull image from Amazon ECR and restart container
         run: |
-          docker pull ${{secrets.ECR_IMAGE_URI}}:latest
-          docker stop interstellar && docker rm interstellar
-          docker run -d --env-file ./.env --name interstellar -p 3000:3000 --restart unless-stopped ${{secrets.ECR_IMAGE_URI}}:latest
+          sudo docker pull ${{secrets.ECR_IMAGE_URI}}:latest
+          sudo docker stop interstellar && sudo docker rm interstellar
+          sudo docker run -d --env-file ~/.env --name interstellar -p 3000:3000 --restart unless-stopped ${{secrets.ECR_IMAGE_URI}}:latest

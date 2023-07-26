@@ -1,6 +1,4 @@
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { IsString } from 'class-validator';
 
 export class GetUserNameDto {
   @IsString()

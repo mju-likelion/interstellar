@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CreateAppointmentDto {
   @IsString()
@@ -10,7 +10,7 @@ export class CreateAppointmentDto {
 
   @Transform(({ value }) => value.trim())
   @IsString()
-  @Matches(/^[A-Za-z0-9!@#$%^&*()]{8,30}$/)
+  // @Matches(/^[A-Za-z0-9!@#$%^&*()]{8,30}$/)
   password: string;
 
   @IsOptional()

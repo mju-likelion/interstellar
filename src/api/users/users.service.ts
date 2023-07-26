@@ -21,18 +21,18 @@ export class UsersService {
     private authService: AuthService
   ) {}
   async createAppointment(createAppointmentDto: CreateAppointmentDto) {
-    const errors400 = [];
-    const errors404 = [];
+    const badRequestErros = [];
+    const notFoundErros = [];
     const { roomCode, username, password, dates, dateOnly } =
       createAppointmentDto;
 
     if (await this.findOne(username)) {
-      errors400.push('Username already exists');
+      badRequestErros.push('Username already exists');
     }
 
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
-      errors400.push('dates must be unique');
+      badRequestErros.push('dates must be unique');
     }
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며 
@@ -42,7 +42,7 @@ export class UsersService {
       for (const date of dates) {
         const [_, selectedTime] = date.split(' ');
         if (!selectedTime) {
-          errors400.push('Time must be selected when dateOnly is false');
+          badRequestErros.push('Time must be selected when dateOnly is false');
           break;
         }
       }
@@ -50,22 +50,22 @@ export class UsersService {
 
     const sortedDates = dates.sort();
     if (dates.join(',') !== sortedDates.join(',')) {
-      errors400.push('dates must be sorted');
+      badRequestErros.push('dates must be sorted');
     }
 
-    if (errors400.length > 0) {
-      throw new BadRequestException(errors400);
+    if (badRequestErros.length > 0) {
+      throw new BadRequestException(badRequestErros);
     }
 
     if (!(await this.roomService.findOne(roomCode))) {
-      errors404.push('Room does not exist');
+      notFoundErros.push('Room does not exist');
     }
 
     const hashedPassword = await hash(password, 10);
     const token = this.authService.login(username, password);
 
-    if (errors404.length > 0) {
-      throw new NotFoundException(errors404);
+    if (notFoundErros.length > 0) {
+      throw new NotFoundException(notFoundErros);
     }
 
     try {

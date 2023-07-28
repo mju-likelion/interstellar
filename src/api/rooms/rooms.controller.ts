@@ -18,8 +18,8 @@ export class RoomsController {
     return this.roomsService.findOne(code);
   }
 
-  @Get(':code/summary')
-  getRoomSummary(@Param('code') code: string) {
-    return this.roomsService.getRoomSummary(code);
+  @Get(':code/result')
+  getRoomResult(@Param('code') code: string) {
+    return this.roomsService.getRoomResult(code);
   }
 }

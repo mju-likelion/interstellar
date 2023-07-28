@@ -48,8 +48,8 @@ export class RoomsService {
     return room;
   }
 
-  getRoomSummary(code: string) {
-    return `This action returns a ${code} room summary`;
+  getRoomResult(code: string) {
+    return `This action returns a ${code} room's result`;
   }
 
   validateDates(createRoomDto: CreateRoomDto) {

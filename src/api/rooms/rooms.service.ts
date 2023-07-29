@@ -49,7 +49,7 @@ export class RoomsService {
   }
 
   getRoomResult(code: string) {
-    return `This action returns a ${code} room's result`;
+    return this.findOne(code);
   }
 
   validateDates(createRoomDto: CreateRoomDto) {

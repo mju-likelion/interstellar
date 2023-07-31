@@ -1,3 +1,5 @@
+import * as console from 'console';
+
 import {
   BadRequestException,
   Injectable,
@@ -48,8 +50,47 @@ export class RoomsService {
     return room;
   }
 
-  getRoomResult(code: string) {
-    return this.findOne(code);
+  async getRoomResult(code: string) {
+    const room = await this.prismaService.room.findUnique({
+      where: { code },
+      include: {
+        users: {
+          select: {
+            enableTimes: true,
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException(`Room with code ${code} not found`);
+    }
+
+    let enableTimes: Record<string, number>;
+
+    if (room.dateOnly) {
+      const enableTimesList = room.users
+        .map(user => user.enableTimes)
+        .flat()
+        .sort();
+
+      const timeMap = new Map();
+      enableTimesList.forEach(time => {
+        if (timeMap.has(time)) {
+          timeMap.set(time, timeMap.get(time) + 1);
+        } else {
+          timeMap.set(time, 1);
+        }
+      });
+      enableTimes = Object.fromEntries(timeMap.entries());
+    }
+
+    delete room.users;
+
+    return {
+      ...room,
+      enableTimes,
+    };
   }
 
   validateDates(createRoomDto: CreateRoomDto) {

@@ -1,11 +1,10 @@
-import * as console from 'console';
-
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Room } from '@prisma/client';
+import uniq from 'lodash/uniq';
 import { customAlphabet } from 'nanoid';
 
 import { PrismaService } from '@/prisma/prisma.service';
@@ -66,24 +65,30 @@ export class RoomsService {
       throw new NotFoundException(`Room with code ${code} not found`);
     }
 
-    let enableTimes: Record<string, number>;
+    let enableTimesList: string[];
 
     if (room.dateOnly) {
-      const enableTimesList = room.users
+      enableTimesList = room.users
         .map(user => user.enableTimes)
         .flat()
         .sort();
-
-      const timeMap = new Map();
-      enableTimesList.forEach(time => {
-        if (timeMap.has(time)) {
-          timeMap.set(time, timeMap.get(time) + 1);
-        } else {
-          timeMap.set(time, 1);
-        }
-      });
-      enableTimes = Object.fromEntries(timeMap.entries());
+    } else {
+      enableTimesList = room.users
+        .map(user => uniq(user.enableTimes.map(time => time.split(' ')[0])))
+        .flat()
+        .map(time => time.split(' ')[0])
+        .sort();
     }
+
+    const timeMap = new Map();
+    enableTimesList.forEach(time => {
+      if (timeMap.has(time)) {
+        timeMap.set(time, timeMap.get(time) + 1);
+      } else {
+        timeMap.set(time, 1);
+      }
+    });
+    const enableTimes = Object.fromEntries(timeMap.entries());
 
     delete room.users;
 

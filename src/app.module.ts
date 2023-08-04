@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RoomsModule } from '@/api/rooms/rooms.module';
 import { UsersModule } from '@/api/users/users.module';
 import { PrismaModule } from '@/prisma/prisma.module';
+import { HealthModule } from '@/health/health.module';
 
 import { AuthModule } from './api/auth/auth.module';
 import authConfig from './config/authConfig';
@@ -18,6 +19,7 @@ import authConfig from './config/authConfig';
     RoomsModule,
     UsersModule,
     AuthModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

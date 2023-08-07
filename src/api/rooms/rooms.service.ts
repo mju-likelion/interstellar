@@ -21,9 +21,37 @@ export class RoomsService {
    * @see {@link https://www.notion.so/likelion-11th/6-6-8fdfd4c7268e4f70bd232dcee5078aab?pvs=4#ca12b4cd60904410bbb83549e748f1cd | Notion}
    */
   async create(createRoomDto: CreateRoomDto): Promise<Room> {
+    this.validateDates(createRoomDto);
+
+    return await this.prismaService.room.create({
+      data: {
+        code: nanoid(),
+        ...createRoomDto,
+        dateOnly: createRoomDto.dateOnly || false,
+      },
+    });
+  }
+
+  async findOne(code: string): Promise<Room> {
+    const room = this.prismaService.room.findUnique({
+      where: { code },
+    });
+
+    if (!room) {
+      throw new NotFoundException(`Room with code ${code} not found`);
+    }
+
+    return room;
+  }
+
+  getRoomSummary(code: string) {
+    return `This action returns a ${code} room summary`;
+  }
+
+  validateDates(createRoomDto: CreateRoomDto) {
     const errors = [];
 
-    const dates = createRoomDto.dates.split(',');
+    const dates = createRoomDto.dates;
     if (dates.length < 1 || dates.length > 60) {
       errors.push('dates must be between 1 and 60');
     }
@@ -41,6 +69,7 @@ export class RoomsService {
     const today = new Date(
       new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
     );
+
     const lastDate = new Date(today.setMonth(today.getMonth() + 6));
     const lastDateString = `${lastDate.getFullYear()}-${(
       '0' +
@@ -77,29 +106,5 @@ export class RoomsService {
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
-
-    return this.prismaService.room.create({
-      data: {
-        ...createRoomDto,
-        code: nanoid(),
-        dateOnly: createRoomDto.dateOnly || false,
-      },
-    });
-  }
-
-  async findOne(code: string): Promise<Room> {
-    const room = this.prismaService.room.findUnique({
-      where: { code },
-    });
-
-    if (!room) {
-      throw new NotFoundException(`Room with code ${code} not found`);
-    }
-
-    return room;
-  }
-
-  getRoomSummary(code: string) {
-    return `This action returns a ${code} room summary`;
   }
 }

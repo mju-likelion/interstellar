@@ -48,10 +48,28 @@ export class RoomsService {
     return `This action returns a ${code} room summary`;
   }
 
+  convertStringtoDate(stringDate: string): Date {
+    return new Date(stringDate);
+  }
+
   validateDates(createRoomDto: CreateRoomDto) {
     const errors = [];
 
     const dates = createRoomDto.dates;
+    const firstDate = this.convertStringtoDate(dates[0]);
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const koreaTimeDiff = 9 * 60 * 60 * 1000;
+    const nowKoreanDate = new Date(utc + koreaTimeDiff);
+
+    const maxDate = new Date(
+      nowKoreanDate.setMonth(nowKoreanDate.getMonth() + 6)
+    );
+    const maxDateString = `${maxDate.getFullYear()}-${(
+      '0' +
+      (maxDate.getMonth() + 1)
+    ).slice(-2)}-${('0' + maxDate.getDate()).slice(-2)}`;
+
     if (dates.length < 1 || dates.length > 60) {
       errors.push('dates must be between 1 and 60');
     }
@@ -66,16 +84,14 @@ export class RoomsService {
       errors.push('dates must be sorted');
     }
 
-    const today = new Date(
-      new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
-    );
+    if (
+      firstDate.getMonth() < nowKoreanDate.getMonth() ||
+      firstDate.getDate() < nowKoreanDate.getDate()
+    ) {
+      errors.push('first date must be today no matter how early it is.');
+    }
 
-    const lastDate = new Date(today.setMonth(today.getMonth() + 6));
-    const lastDateString = `${lastDate.getFullYear()}-${(
-      '0' +
-      (lastDate.getMonth() + 1)
-    ).slice(-2)}-${('0' + lastDate.getDate()).slice(-2)}`;
-    if (sortedDates.at(-1) > lastDateString) {
+    if (sortedDates.at(-1) > maxDateString) {
       errors.push('dates must be within 6 months');
     }
 

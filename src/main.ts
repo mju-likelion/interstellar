@@ -5,8 +5,13 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['health-check'],
+  });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(3000);
+  app.enableCors({
+    origin: RegExp(process.env.CORS_ORIGIN),
+  });
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

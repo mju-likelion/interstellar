@@ -1,8 +1,10 @@
 import { IsBoolean, IsOptional, Matches } from 'class-validator';
 
 export class CreateRoomDto {
-  @Matches(/^(\d{4}-\d{2}-\d{2},?)+$/)
-  dates: string;
+  @Matches(/^(\d{4}-\d{2}-\d{2})$/, {
+    each: true,
+  })
+  dates: string[];
 
   @IsOptional()
   @IsBoolean()

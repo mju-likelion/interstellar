@@ -5,6 +5,8 @@ CREATE TABLE "Room" (
     "dateOnly" BOOLEAN NOT NULL,
     "startTime" TEXT,
     "endTime" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Room_pkey" PRIMARY KEY ("code")
 );
@@ -14,8 +16,10 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "enableTimes" TEXT NOT NULL,
+    "enableTimes" TEXT[],
     "roomId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

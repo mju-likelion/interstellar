@@ -20,6 +20,26 @@ export class UsersService {
     private readonly roomService: RoomsService,
     private authService: AuthService
   ) {}
+
+  private async isDateOnlyFormatValid(dateOnly: boolean, dates: string[]) {
+    let result = true;
+    if (!dateOnly) {
+      for (const date of dates) {
+        const [_, selectedTime] = date.split(' ');
+        if (!selectedTime) {
+          result = false;
+        }
+      }
+    }
+    return result;
+  }
+
+  async findOne(username: string): Promise<User> {
+    return this.prismaService.user.findUnique({
+      where: { username },
+    });
+  }
+
   async createAppointment(createAppointmentDto: CreateAppointmentDto) {
     const badRequestErros = [];
     const notFoundErros = [];
@@ -50,7 +70,7 @@ export class UsersService {
     if (badRequestErros.length > 0) {
       throw new BadRequestException(badRequestErros);
     }
-
+    console.log(roomCode);
     if (!(await this.roomService.findOne(roomCode))) {
       notFoundErros.push('Room does not exist');
     }
@@ -76,25 +96,6 @@ export class UsersService {
     }
 
     return token;
-  }
-
-  async findOne(username: string): Promise<User> {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
-  }
-
-  async isDateOnlyFormatValid(dateOnly: boolean, dates: string[]) {
-    let result = true;
-    if (!dateOnly) {
-      for (const date of dates) {
-        const [_, selectedTime] = date.split(' ');
-        if (!selectedTime) {
-          result = false;
-        }
-      }
-    }
-    return result;
   }
 
   async update(roomCode: string, updateUserDto: UpdateUserDto) {

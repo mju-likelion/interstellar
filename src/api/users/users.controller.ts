@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  Req,
   Patch,
   UseGuards,
   Param,
@@ -31,9 +30,9 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch()
+  @Patch(':roomCode')
   update(
-    @Query('roomCode') roomCode: string,
+    @Param('roomCode') roomCode: string,
     @Body() updateUserDto: UpdateUserDto
   ) {
     return this.usersService.update(roomCode, updateUserDto);

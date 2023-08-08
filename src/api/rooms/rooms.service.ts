@@ -23,7 +23,7 @@ export class RoomsService {
   async create(createRoomDto: CreateRoomDto): Promise<Room> {
     this.validateDates(createRoomDto);
 
-    return await this.prismaService.room.create({
+    return this.prismaService.room.create({
       data: {
         code: nanoid(),
         ...createRoomDto,

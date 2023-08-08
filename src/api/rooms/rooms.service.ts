@@ -16,6 +16,10 @@ const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6);
 export class RoomsService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  private convertStringToDate(stringDate: string): Date {
+    return new Date(stringDate);
+  }
+
   /**
    * 이 부분 상세 조건들은 아래 슬랙을 참고하시면 좋습니다
    * @see {@link https://www.notion.so/likelion-11th/6-6-8fdfd4c7268e4f70bd232dcee5078aab?pvs=4#ca12b4cd60904410bbb83549e748f1cd | Notion}
@@ -48,15 +52,11 @@ export class RoomsService {
     return `This action returns a ${code} room summary`;
   }
 
-  convertStringtoDate(stringDate: string): Date {
-    return new Date(stringDate);
-  }
-
   validateDates(createRoomDto: CreateRoomDto) {
     const errors = [];
 
     const dates = createRoomDto.dates;
-    const firstDate = this.convertStringtoDate(dates[0]);
+    const firstDate = this.convertStringToDate(dates[0]);
     const now = new Date();
     const utc = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
     const koreaTimeDiff = 9 * 60 * 60 * 1000;

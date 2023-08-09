@@ -25,7 +25,7 @@ export class UsersService {
     let result = true;
     if (!dateOnly) {
       for (const date of dates) {
-        const [_, selectedTime] = date.split(' ');
+        const [, selectedTime] = date.split(' ');
         if (!selectedTime) {
           result = false;
         }
@@ -121,7 +121,7 @@ export class UsersService {
       throw new NotFoundException(notFoundErrors);
     }
 
-    return await this.prismaService.user.update({
+    return this.prismaService.user.update({
       where: { username },
       data: { enableTimes: dates },
     });

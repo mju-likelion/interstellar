@@ -1,12 +1,12 @@
 -- CreateTable
 CREATE TABLE "Room" (
     "code" TEXT NOT NULL,
-    "dates" TEXT NOT NULL,
     "dateOnly" BOOLEAN NOT NULL,
     "startTime" TEXT,
     "endTime" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "dates" TEXT[],
 
     CONSTRAINT "Room_pkey" PRIMARY KEY ("code")
 );
@@ -23,9 +23,6 @@ CREATE TABLE "User" (
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "Room"("code") ON DELETE RESTRICT ON UPDATE CASCADE;

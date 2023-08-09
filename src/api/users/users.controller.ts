@@ -24,11 +24,6 @@ export class UsersController {
     return this.usersService.createAppointment(createAppointmentDto);
   }
 
-  @Get(':username')
-  findOne(@Param() { username }: GetUserNameDto) {
-    return this.usersService.findOne(username);
-  }
-
   @UseGuards(AuthGuard('jwt'))
   @Patch(':roomCode')
   update(

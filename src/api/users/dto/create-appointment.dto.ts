@@ -13,10 +13,6 @@ export class CreateAppointmentDto {
   // @Matches(/^[A-Za-z0-9!@#$%^&*()]{8,30}$/)
   password: string;
 
-  @IsOptional()
-  @IsBoolean()
-  dateOnly?: boolean;
-
   @IsString({ each: true })
   dates: string[];
 }

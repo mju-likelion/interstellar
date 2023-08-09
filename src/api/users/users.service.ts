@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { User } from '@prisma/client';
+import { Room, User } from '@prisma/client';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -25,7 +25,7 @@ export class UsersService {
     let result = true;
     if (!dateOnly) {
       for (const date of dates) {
-        const [_, selectedTime] = date.split(' ');
+        const [, selectedTime] = date.split(' ');
         if (!selectedTime) {
           result = false;
         }
@@ -34,48 +34,49 @@ export class UsersService {
     return result;
   }
 
-  async findOne(username: string): Promise<User> {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
-  }
-
   async createAppointment(createAppointmentDto: CreateAppointmentDto) {
-    const badRequestErros = [];
-    const notFoundErros = [];
-    const { roomCode, username, password, dates, dateOnly } =
-      createAppointmentDto;
+    const badRequestErrors = [];
+    const notFoundErrors = [];
+    const { roomCode, username, password, dates } = createAppointmentDto;
 
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
-      badRequestErros.push('dates must be unique');
+      badRequestErrors.push('dates must be unique');
     }
+
+    const sortedDates = dates.sort();
+    if (dates.join(',') !== sortedDates.join(',')) {
+      badRequestErrors.push('dates must be sorted');
+    }
+
+    let room: Room;
+    try {
+      room = await this.roomService.findOne(roomCode);
+    } catch (e) {
+      if (e instanceof NotFoundException) {
+        notFoundErrors.push('Room does not exist');
+      }
+    }
+
+    const dateOnly = room.dateOnly;
+
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며
     공백을 기준으로 날짜와 시간으로 나눕니다.
     */
     if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
-      badRequestErros.push('Time must be provided when dateOnly is false');
+      badRequestErrors.push('Time must be provided when dateOnly is false');
     }
 
-    const sortedDates = dates.sort();
-    if (dates.join(',') !== sortedDates.join(',')) {
-      badRequestErros.push('dates must be sorted');
-    }
-
-    if (badRequestErros.length > 0) {
-      throw new BadRequestException(badRequestErros);
-    }
-    console.log(roomCode);
-    if (!(await this.roomService.findOne(roomCode))) {
-      notFoundErros.push('Room does not exist');
+    if (badRequestErrors.length > 0) {
+      throw new BadRequestException(badRequestErrors);
     }
 
     const hashedPassword = await hash(password, 10);
     const token = this.authService.login(username, password);
 
-    if (notFoundErros.length > 0) {
-      throw new NotFoundException(notFoundErros);
+    if (notFoundErrors.length > 0) {
+      throw new NotFoundException(notFoundErrors);
     }
 
     try {
@@ -95,34 +96,38 @@ export class UsersService {
   }
 
   async update(roomCode: string, updateUserDto: UpdateUserDto) {
-    const badRequestErros = [];
-    const notFoundErros = [];
+    const badRequestErrors = [];
+    const notFoundErrors = [];
     const { username, dates, dateOnly } = updateUserDto;
-    const userInfo = await this.findOne(username);
+    const userInfo = await this.prismaService.user.findFirst({
+      where: { username, roomId: roomCode },
+    });
 
     if (!userInfo) {
-      badRequestErros.push('User does not exist');
+      badRequestErrors.push('User does not exist');
     }
 
     if (!(await this.roomService.findOne(roomCode))) {
-      notFoundErros.push('Room does not exist');
+      notFoundErrors.push('Room does not exist');
     }
 
     // 해당 유저가 수정한 가용시간에 대한 유효성을 검사한다.
     if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
-      badRequestErros.push('Time must be provided when dateOnly is false');
+      badRequestErrors.push('Time must be provided when dateOnly is false');
     }
 
-    if (badRequestErros.length > 0) {
-      throw new BadRequestException(badRequestErros);
+    if (badRequestErrors.length > 0) {
+      throw new BadRequestException(badRequestErrors);
     }
 
-    if (notFoundErros.length > 0) {
-      throw new NotFoundException(notFoundErros);
+    if (notFoundErrors.length > 0) {
+      throw new NotFoundException(notFoundErrors);
     }
 
-    return await this.prismaService.user.update({
-      where: { username },
+    return this.prismaService.user.update({
+      where: {
+        id: userInfo.id,
+      },
       data: { enableTimes: dates },
     });
   }

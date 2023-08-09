@@ -25,7 +25,8 @@ export class AuthService {
   }
 
   async validateUser(username: string, password: string) {
-    const user = await this.prismaService.user.findUnique({
+    // TODO: 임시땜빵 - 추후 room code 를 같이 받도록 수정해야 함
+    const user = await this.prismaService.user.findFirst({
       where: { username },
     });
 

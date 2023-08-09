@@ -34,17 +34,10 @@ export class UsersService {
     return result;
   }
 
-  async findOne(username: string): Promise<User> {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
-  }
-
   async createAppointment(createAppointmentDto: CreateAppointmentDto) {
     const badRequestErrors = [];
     const notFoundErrors = [];
-    const { roomCode, username, password, dates, dateOnly } =
-      createAppointmentDto;
+    const { roomCode, username, password, dates } = createAppointmentDto;
 
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
@@ -98,7 +91,9 @@ export class UsersService {
     const badRequestErrors = [];
     const notFoundErrors = [];
     const { username, dates, dateOnly } = updateUserDto;
-    const userInfo = await this.findOne(username);
+    const userInfo = await this.prismaService.user.findFirst({
+      where: { username, roomId: roomCode },
+    });
 
     if (!userInfo) {
       badRequestErrors.push('User does not exist');
@@ -122,7 +117,9 @@ export class UsersService {
     }
 
     return this.prismaService.user.update({
-      where: { username },
+      where: {
+        id: userInfo.id,
+      },
       data: { enableTimes: dates },
     });
   }

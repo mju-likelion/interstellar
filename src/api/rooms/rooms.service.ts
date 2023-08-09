@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Room } from '@prisma/client';
+import uniq from 'lodash/uniq';
 import { customAlphabet } from 'nanoid';
 
 import { PrismaService } from '@/prisma/prisma.service';
@@ -48,8 +49,53 @@ export class RoomsService {
     return room;
   }
 
-  getRoomSummary(code: string) {
-    return `This action returns a ${code} room summary`;
+  async getRoomResult(code: string) {
+    const room = await this.prismaService.room.findUnique({
+      where: { code },
+      include: {
+        users: {
+          select: {
+            enableTimes: true,
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException(`Room with code ${code} not found`);
+    }
+
+    let enableTimesList: string[];
+
+    if (room.dateOnly) {
+      enableTimesList = room.users
+        .map(user => user.enableTimes)
+        .flat()
+        .sort();
+    } else {
+      enableTimesList = room.users
+        .map(user => uniq(user.enableTimes.map(time => time.split(' ')[0])))
+        .flat()
+        .map(time => time.split(' ')[0])
+        .sort();
+    }
+
+    const timeMap = new Map();
+    enableTimesList.forEach(time => {
+      if (timeMap.has(time)) {
+        timeMap.set(time, timeMap.get(time) + 1);
+      } else {
+        timeMap.set(time, 1);
+      }
+    });
+    const enableTimes = Object.fromEntries(timeMap.entries());
+
+    delete room.users;
+
+    return {
+      ...room,
+      enableTimes,
+    };
   }
 
   validateDates(createRoomDto: CreateRoomDto) {

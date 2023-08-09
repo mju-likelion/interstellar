@@ -46,16 +46,12 @@ export class UsersService {
     const { roomCode, username, password, dates, dateOnly } =
       createAppointmentDto;
 
-    if (await this.findOne(username)) {
-      badRequestErros.push('Username already exists');
-    }
-
     const uniqueDates = new Set(dates);
     if (dates.length !== uniqueDates.size) {
       badRequestErros.push('dates must be unique');
     }
     /*
-    dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며 
+    dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며
     공백을 기준으로 날짜와 시간으로 나눕니다.
     */
     if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {

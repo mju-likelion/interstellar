@@ -22,7 +22,7 @@ model Room {
 
 model User {
   id          String   @id @default(uuid())
-  username    String   @unique
+  username    String
   password    String
   enableTimes String[]
   roomId      String

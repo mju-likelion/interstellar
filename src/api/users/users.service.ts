@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { User } from '@prisma/client';
+import { Room, User } from '@prisma/client';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -43,6 +43,23 @@ export class UsersService {
     if (dates.length !== uniqueDates.size) {
       badRequestErrors.push('dates must be unique');
     }
+
+    const sortedDates = dates.sort();
+    if (dates.join(',') !== sortedDates.join(',')) {
+      badRequestErrors.push('dates must be sorted');
+    }
+
+    let room: Room;
+    try {
+      room = await this.roomService.findOne(roomCode);
+    } catch (e) {
+      if (e instanceof NotFoundException) {
+        notFoundErrors.push('Room does not exist');
+      }
+    }
+
+    const dateOnly = room.dateOnly;
+
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며
     공백을 기준으로 날짜와 시간으로 나눕니다.
@@ -51,17 +68,8 @@ export class UsersService {
       badRequestErrors.push('Time must be provided when dateOnly is false');
     }
 
-    const sortedDates = dates.sort();
-    if (dates.join(',') !== sortedDates.join(',')) {
-      badRequestErrors.push('dates must be sorted');
-    }
-
     if (badRequestErrors.length > 0) {
       throw new BadRequestException(badRequestErrors);
-    }
-    console.log(roomCode);
-    if (!(await this.roomService.findOne(roomCode))) {
-      notFoundErrors.push('Room does not exist');
     }
 
     const hashedPassword = await hash(password, 10);

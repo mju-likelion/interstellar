@@ -20,6 +20,26 @@ export class UsersService {
     private readonly roomService: RoomsService,
     private authService: AuthService
   ) {}
+
+  private async isDateOnlyFormatValid(dateOnly: boolean, dates: string[]) {
+    let result = true;
+    if (!dateOnly) {
+      for (const date of dates) {
+        const [_, selectedTime] = date.split(' ');
+        if (!selectedTime) {
+          result = false;
+        }
+      }
+    }
+    return result;
+  }
+
+  async findOne(username: string): Promise<User> {
+    return this.prismaService.user.findUnique({
+      where: { username },
+    });
+  }
+
   async createAppointment(createAppointmentDto: CreateAppointmentDto) {
     const badRequestErros = [];
     const notFoundErros = [];
@@ -38,14 +58,8 @@ export class UsersService {
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며 
     공백을 기준으로 날짜와 시간으로 나눕니다.
     */
-    if (!dateOnly) {
-      for (const date of dates) {
-        const [_, selectedTime] = date.split(' ');
-        if (!selectedTime) {
-          badRequestErros.push('Time must be selected when dateOnly is false');
-          break;
-        }
-      }
+    if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
+      badRequestErros.push('Time must be provided when dateOnly is false');
     }
 
     const sortedDates = dates.sort();
@@ -56,7 +70,7 @@ export class UsersService {
     if (badRequestErros.length > 0) {
       throw new BadRequestException(badRequestErros);
     }
-
+    console.log(roomCode);
     if (!(await this.roomService.findOne(roomCode))) {
       notFoundErros.push('Room does not exist');
     }
@@ -84,13 +98,36 @@ export class UsersService {
     return token;
   }
 
-  findOne(username: string): Promise<User> {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
-  }
+  async update(roomCode: string, updateUserDto: UpdateUserDto) {
+    const badRequestErros = [];
+    const notFoundErros = [];
+    const { username, dates, dateOnly } = updateUserDto;
+    const userInfo = await this.findOne(username);
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    if (!userInfo) {
+      badRequestErros.push('User does not exist');
+    }
+
+    if (!(await this.roomService.findOne(roomCode))) {
+      notFoundErros.push('Room does not exist');
+    }
+
+    // 해당 유저가 수정한 가용시간에 대한 유효성을 검사한다.
+    if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
+      badRequestErros.push('Time must be provided when dateOnly is false');
+    }
+
+    if (badRequestErros.length > 0) {
+      throw new BadRequestException(badRequestErros);
+    }
+
+    if (notFoundErros.length > 0) {
+      throw new NotFoundException(notFoundErros);
+    }
+
+    return await this.prismaService.user.update({
+      where: { username },
+      data: { enableTimes: dates },
+    });
   }
 }

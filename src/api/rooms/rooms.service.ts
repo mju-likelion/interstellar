@@ -49,7 +49,7 @@ export class RoomsService {
     return room;
   }
 
-  async getRoomResult(code: string) {
+  async getResult(code: string) {
     const room = await this.prismaService.room.findUnique({
       where: { code },
       include: {

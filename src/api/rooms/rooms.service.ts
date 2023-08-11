@@ -98,6 +98,10 @@ export class RoomsService {
     };
   }
 
+  async getResultByDate(code: string, date: string) {
+    return `getResultByDate ${code} ${date}`;
+  }
+
   validateDates(createRoomDto: CreateRoomDto) {
     const errors = [];
 

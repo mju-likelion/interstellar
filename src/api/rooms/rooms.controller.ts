@@ -25,4 +25,9 @@ export class RoomsController {
   getResult(@Param() { code }: FindOneRoomParamDto) {
     return this.roomsService.getResult(code);
   }
+
+  @Get(':code/result/:date')
+  getResultByDate(@Param() { code, date }: GetRoomResultByDateParamDto) {
+    return this.roomsService.getResultByDate(code, date);
+  }
 }

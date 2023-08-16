@@ -134,6 +134,7 @@ export class RoomsService {
     if (room.dateOnly) {
       return {
         code,
+        selectedDate: date,
         dateOnly,
         votingUsers: filteredUsersInDate.map(user => user.username),
       };
@@ -161,6 +162,7 @@ export class RoomsService {
     // 시간도 선택하는 방이면
     return {
       code,
+      selectedDate: date,
       dateOnly,
       startTime,
       endTime,

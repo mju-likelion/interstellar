@@ -14,8 +14,8 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async login(userName: string, password: string) {
-    const payload = { userName, password };
+  createToken(userName: string) {
+    const payload = { userName };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.config.jwtSecret,

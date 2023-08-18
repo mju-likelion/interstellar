@@ -64,7 +64,7 @@ export class UsersService {
     }
 
     const hashedPassword = await hash(password, 10);
-    const token = this.authService.login(username, password);
+    const token = this.authService.createToken(username);
 
     if (notFoundErrors.length > 0) {
       throw new NotFoundException(notFoundErrors);

@@ -14,8 +14,8 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  createToken(userName: string) {
-    const payload = { userName };
+  createToken(username: string) {
+    const payload = { username };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.config.jwtSecret,

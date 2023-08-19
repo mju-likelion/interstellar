@@ -20,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
-    const { userName, password } = payload;
-    const user = await this.authService.validateUser(userName, password);
+    const { username, password } = payload;
+    const user = await this.authService.validateUser(username, password);
     //에러를 발생시키지 않기로 했으므로 validate를 요청했을때의 리턴값이 존재하지 않을경우 error를 푸시하는 방향으로 하겠습니다.
     return user;
   }

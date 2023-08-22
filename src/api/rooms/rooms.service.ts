@@ -21,6 +21,15 @@ export class RoomsService {
     return new Date(stringDate);
   }
 
+  async getRoomInfo(code: string): Promise<boolean> {
+    const roomInfo = await this.prismaService.room.findUnique({
+      where: { code },
+    });
+    //만약 방이 없다면 예외처리를 어떻게 해야 할까요??
+    const dateOnly = roomInfo.dateOnly;
+    return dateOnly;
+  }
+
   /**
    * 이 부분 상세 조건들은 아래 슬랙을 참고하시면 좋습니다
    * @see {@link https://www.notion.so/likelion-11th/6-6-8fdfd4c7268e4f70bd232dcee5078aab?pvs=4#ca12b4cd60904410bbb83549e748f1cd | Notion}

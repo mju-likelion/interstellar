@@ -49,16 +49,7 @@ export class UsersService {
       badRequestErrors.push('dates must be sorted');
     }
 
-    let room: Room;
-    try {
-      room = await this.roomService.findOne(roomCode);
-    } catch (e) {
-      if (e instanceof NotFoundException) {
-        notFoundErrors.push('Room does not exist');
-      }
-    }
-
-    const dateOnly = room.dateOnly;
+    const dateOnly = await this.roomService.getRoomInfo(roomCode);
 
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며
@@ -95,14 +86,17 @@ export class UsersService {
     return token;
   }
 
-  async update(roomCode: string, updateUserDto: UpdateUserDto) {
+  async update(
+    userInfoFromTk: User,
+    roomCode: string,
+    updateUserDto: UpdateUserDto
+  ) {
     const badRequestErrors = [];
     const notFoundErrors = [];
-    const { username, dates, dateOnly } = updateUserDto;
+    const { dates } = updateUserDto;
     const userInfo = await this.prismaService.user.findFirst({
-      where: { username, roomId: roomCode },
+      where: { id: userInfoFromTk.id, roomId: roomCode },
     });
-
     if (!userInfo) {
       badRequestErrors.push('User does not exist');
     }
@@ -110,6 +104,8 @@ export class UsersService {
     if (!(await this.roomService.findOne(roomCode))) {
       notFoundErrors.push('Room does not exist');
     }
+
+    const dateOnly = await this.roomService.getRoomInfo(roomCode);
 
     // 해당 유저가 수정한 가용시간에 대한 유효성을 검사한다.
     if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {

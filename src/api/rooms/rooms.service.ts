@@ -22,6 +22,21 @@ export class RoomsService {
   }
 
   /**
+   * @example filterUsersInDate(users, '2023-08-23')
+   */
+  private filterUsersInDate(
+    users: { username: string; enableTimes: string[] }[],
+    date: string
+  ) {
+    return users.filter(user => {
+      const enableTimes = user.enableTimes;
+      const enableDates = enableTimes.map(time => time.split(' ')[0]);
+
+      return enableDates.includes(date);
+    });
+  }
+
+  /**
    * 이 부분 상세 조건들은 아래 슬랙을 참고하시면 좋습니다
    * @see {@link https://www.notion.so/likelion-11th/6-6-8fdfd4c7268e4f70bd232dcee5078aab?pvs=4#ca12b4cd60904410bbb83549e748f1cd | Notion}
    */
@@ -49,7 +64,7 @@ export class RoomsService {
     return room;
   }
 
-  async getRoomResult(code: string) {
+  async getResult(code: string) {
     const room = await this.prismaService.room.findUnique({
       where: { code },
       include: {
@@ -95,6 +110,64 @@ export class RoomsService {
     return {
       ...room,
       enableTimes,
+    };
+  }
+
+  async getResultByDate(code: string, date: string) {
+    const room = await this.prismaService.room.findUnique({
+      where: { code },
+      include: {
+        users: {
+          select: {
+            username: true,
+            enableTimes: true,
+          },
+        },
+      },
+    });
+
+    const { users } = room;
+    const filteredUsersInDate = this.filterUsersInDate(users, date);
+    const { dateOnly, startTime, endTime } = room;
+
+    // 날짜만 선택하는 방이면
+    if (room.dateOnly) {
+      return {
+        code,
+        selectedDate: date,
+        dateOnly,
+        votingUsers: filteredUsersInDate.map(user => user.username),
+      };
+    }
+
+    // 모두가 선택한 시간들을 골라보기
+    const selectedTimes = filteredUsersInDate
+      .map(user => user.enableTimes)
+      .flat()
+      .map(time => time.split(' ')[1])
+      .sort()
+      .reduce((acc, cur) => {
+        if (acc[cur]) {
+          acc[cur] += 1;
+        } else {
+          acc[cur] = 1;
+        }
+        return acc;
+      }, {});
+    // 그 중 모두가 선택한 시간만 선택
+    const everyoneSelectedTimes = Object.keys(selectedTimes).filter(
+      time => selectedTimes[time] === filteredUsersInDate.length
+    );
+
+    // 시간도 선택하는 방이면
+    return {
+      code,
+      selectedDate: date,
+      dateOnly,
+      startTime,
+      endTime,
+      votingUsers: filteredUsersInDate.map(user => user.username),
+      everyoneSelectedTimes,
     };
   }
 

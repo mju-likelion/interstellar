@@ -70,6 +70,7 @@ export class RoomsService {
       include: {
         users: {
           select: {
+            username: true,
             enableTimes: true,
           },
         },
@@ -79,6 +80,8 @@ export class RoomsService {
     if (!room) {
       throw new NotFoundException(`Room with code ${code} not found`);
     }
+
+    const { dateOnly, startTime, endTime, createdAt, updatedAt, dates } = room;
 
     let enableTimesList: string[];
 
@@ -105,10 +108,15 @@ export class RoomsService {
     });
     const enableTimes = Object.fromEntries(timeMap.entries());
 
-    delete room.users;
-
     return {
-      ...room,
+      code,
+      dateOnly,
+      startTime,
+      endTime,
+      createdAt,
+      updatedAt,
+      dates,
+      votingUsers: room.users.map(user => user.username),
       enableTimes,
     };
   }

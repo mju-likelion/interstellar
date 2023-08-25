@@ -49,22 +49,13 @@ export class UsersService {
       badRequestErrors.push('dates must be sorted');
     }
 
-    let room: Room;
-    try {
-      room = await this.roomService.findOne(roomCode);
-    } catch (e) {
-      if (e instanceof NotFoundException) {
-        notFoundErrors.push('Room does not exist');
-      }
-    }
-
-    const dateOnly = room.dateOnly;
+    const room = await this.roomService.findOne(roomCode);
 
     /*
     dates는 ['2023-07-19 12:30','2023-07-20 13:45']이런 식으로 된 배열이며
     공백을 기준으로 날짜와 시간으로 나눕니다.
     */
-    if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
+    if (!(await this.isDateOnlyFormatValid(room.dateOnly, dates))) {
       badRequestErrors.push('Time must be provided when dateOnly is false');
     }
 
@@ -95,15 +86,18 @@ export class UsersService {
     return token;
   }
 
-  async update(roomCode: string, updateUserDto: UpdateUserDto) {
+  async update(
+    userInfoFromJwt: User,
+    roomCode: string,
+    updateUserDto: UpdateUserDto
+  ) {
     const badRequestErrors = [];
     const notFoundErrors = [];
-    const { username, dates, dateOnly } = updateUserDto;
-    const userInfo = await this.prismaService.user.findFirst({
-      where: { username, roomId: roomCode },
+    const { dates } = updateUserDto;
+    const userInfoFromDB = await this.prismaService.user.findFirst({
+      where: { id: userInfoFromJwt.id, roomId: roomCode },
     });
-
-    if (!userInfo) {
+    if (!userInfoFromDB) {
       badRequestErrors.push('User does not exist');
     }
 
@@ -111,8 +105,10 @@ export class UsersService {
       notFoundErrors.push('Room does not exist');
     }
 
+    const room = await this.roomService.findOne(roomCode);
+
     // 해당 유저가 수정한 가용시간에 대한 유효성을 검사한다.
-    if (!(await this.isDateOnlyFormatValid(dateOnly, dates))) {
+    if (!(await this.isDateOnlyFormatValid(room.dateOnly, dates))) {
       badRequestErrors.push('Time must be provided when dateOnly is false');
     }
 
@@ -126,7 +122,7 @@ export class UsersService {
 
     return this.prismaService.user.update({
       where: {
-        id: userInfo.id,
+        id: userInfoFromDB.id,
       },
       data: { enableTimes: dates },
     });

@@ -28,12 +28,26 @@ export class RoomsService {
     users: { username: string; enableTimes: string[] }[],
     date: string
   ) {
-    return users.filter(user => {
-      const enableTimes = user.enableTimes;
+    const usersInDate = users.filter(user => {
+      const { enableTimes } = user;
       const enableDates = enableTimes.map(time => time.split(' ')[0]);
 
       return enableDates.includes(date);
     });
+
+    // user에서 해당 날짜에 해당하는 시간만 남기기
+    const parsedUsersInDate = usersInDate.map(user => {
+      const { enableTimes } = user;
+      const parsedEnableTimes = enableTimes.filter(
+        time => time.split(' ')[0] === date
+      );
+      return {
+        ...user,
+        enableTimes: parsedEnableTimes,
+      };
+    });
+
+    return parsedUsersInDate;
   }
 
   /**
@@ -148,7 +162,7 @@ export class RoomsService {
       };
     }
 
-    // 모두가 선택한 시간들을 골라보기
+    // 모두가 선택한 시간들을 객체로 모으기
     const selectedTimes = filteredUsersInDate
       .map(user => user.enableTimes)
       .flat()

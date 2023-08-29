@@ -7,7 +7,8 @@ import {
   Param,
   Request,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+
+import { JwtAuthGuard } from '../auth/auth.guard';
 
 import { UsersService } from './users.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -22,7 +23,7 @@ export class UsersController {
     return this.usersService.createAppointment(createAppointmentDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(':roomCode')
   update(
     @Request() req,

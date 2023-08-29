@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Inject, Injectable } from '@nestjs/common';
 import authConfig from 'src/config/authConfig';
 import { ConfigType } from '@nestjs/config';
-import { compare } from 'bcrypt';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -14,8 +13,8 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  async login(userName: string, password: string) {
-    const payload = { userName, password };
+  createToken(username: string) {
+    const payload = { username };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.config.jwtSecret,
@@ -24,13 +23,14 @@ export class AuthService {
     };
   }
 
-  async validateUser(username: string, password: string) {
-    // TODO: 임시땜빵 - 추후 room code 를 같이 받도록 수정해야 함
+  async validateUser(username: string) {
     const user = await this.prismaService.user.findFirst({
       where: { username },
+      include: { room: true },
     });
 
-    if (!user || (user && !compare(password, user.password))) return null;
+    if (!user) return null;
+
     return user;
   }
 }

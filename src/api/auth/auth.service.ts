@@ -13,8 +13,8 @@ export class AuthService {
     private readonly prismaService: PrismaService
   ) {}
 
-  createToken(username: string) {
-    const payload = { username };
+  createToken(username: string, roomCode: string) {
+    const payload = { username, roomCode };
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.config.jwtSecret,
@@ -23,9 +23,9 @@ export class AuthService {
     };
   }
 
-  async validateUser(username: string) {
+  async validateUser(username: string, roomCode: string) {
     const user = await this.prismaService.user.findFirst({
-      where: { username },
+      where: { username, roomId: roomCode },
       include: { room: true },
     });
 

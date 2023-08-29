@@ -20,8 +20,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
   //토큰 검증
   async validate(payload: any) {
-    const { username } = payload;
-    const user = await this.authService.validateUser(username);
+    console.log('validate called');
+    const { username, roomCode } = payload;
+    const user = await this.authService.validateUser(username, roomCode);
+    console.log(user);
     return user;
   }
 }

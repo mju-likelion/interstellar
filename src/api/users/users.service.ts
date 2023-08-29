@@ -64,7 +64,7 @@ export class UsersService {
     }
 
     const hashedPassword = await hash(password, 10);
-    const token = this.authService.createToken(username);
+    const token = this.authService.createToken(username, roomCode);
 
     if (notFoundErrors.length > 0) {
       throw new NotFoundException(notFoundErrors);
@@ -120,11 +120,15 @@ export class UsersService {
       throw new NotFoundException(notFoundErrors);
     }
 
-    return this.prismaService.user.update({
+    const user = await this.prismaService.user.update({
       where: {
         id: userInfoFromDB.id,
       },
       data: { enableTimes: dates },
     });
+
+    delete user.password;
+
+    return user;
   }
 }

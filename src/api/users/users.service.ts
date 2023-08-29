@@ -120,11 +120,15 @@ export class UsersService {
       throw new NotFoundException(notFoundErrors);
     }
 
-    return this.prismaService.user.update({
+    const user = await this.prismaService.user.update({
       where: {
         id: userInfoFromDB.id,
       },
       data: { enableTimes: dates },
     });
+
+    delete user.password;
+
+    return user;
   }
 }

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { Room, User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 import { PrismaService } from '@/prisma/prisma.service';
 

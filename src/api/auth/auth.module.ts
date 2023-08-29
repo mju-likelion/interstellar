@@ -7,7 +7,7 @@ import authConfig from 'src/config/authConfig';
 import { PrismaModule } from '@/prisma/prisma.module';
 
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from './auth.strategy';
 
 @Module({
   imports: [

@@ -229,7 +229,9 @@ export class RoomsService {
       firstDate.getMonth() < nowKoreanDate.getMonth() ||
       firstDate.getDate() < nowKoreanDate.getDate()
     ) {
-      errors.push('first date must be today no matter how early it is.');
+      errors.push(
+        'first date must be later than today no matter how early it is.'
+      );
     }
 
     if (sortedDates.at(-1) > maxDateString) {

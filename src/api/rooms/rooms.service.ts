@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Room } from '@prisma/client';
+import { add } from 'date-fns';
 import uniq from 'lodash/uniq';
 import { customAlphabet } from 'nanoid';
 
@@ -198,14 +199,9 @@ export class RoomsService {
 
     const dates = createRoomDto.dates;
     const firstDate = this.convertStringToDate(dates[0]);
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-    const koreaTimeDiff = 9 * 60 * 60 * 1000;
-    const nowKoreanDate = new Date(utc + koreaTimeDiff);
+    const nowKoreanDate = add(new Date(), { hours: 9 });
 
-    const maxDate = new Date(
-      nowKoreanDate.setMonth(nowKoreanDate.getMonth() + 6)
-    );
+    const maxDate = add(nowKoreanDate, { months: 6 });
     const maxDateString = `${maxDate.getFullYear()}-${(
       '0' +
       (maxDate.getMonth() + 1)
@@ -225,11 +221,10 @@ export class RoomsService {
       errors.push('dates must be sorted');
     }
 
-    if (
-      firstDate.getMonth() < nowKoreanDate.getMonth() ||
-      firstDate.getDate() < nowKoreanDate.getDate()
-    ) {
-      errors.push('first date must be today no matter how early it is.');
+    if (firstDate < nowKoreanDate) {
+      errors.push(
+        'first date must be later than today no matter how early it is.'
+      );
     }
 
     if (sortedDates.at(-1) > maxDateString) {

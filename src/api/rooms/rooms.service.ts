@@ -221,7 +221,7 @@ export class RoomsService {
       errors.push('dates must be sorted');
     }
 
-    if (firstDate < nowKoreanDate) {
+    if (add(firstDate, { days: 1 }) < nowKoreanDate) {
       errors.push(
         'first date must be later than today no matter how early it is.'
       );

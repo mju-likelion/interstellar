@@ -168,7 +168,6 @@ export class RoomsService {
       .map(user => user.enableTimes)
       .flat()
       .map(time => time.split(' ')[1])
-      .sort()
       .reduce((acc, cur) => {
         if (acc[cur]) {
           acc[cur] += 1;

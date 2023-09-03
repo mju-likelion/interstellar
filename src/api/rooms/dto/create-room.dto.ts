@@ -11,10 +11,10 @@ export class CreateRoomDto {
   dateOnly?: boolean;
 
   @IsOptional()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+  @Matches(/^([01]\d|2[0-4]):([0-5]\d)$/)
   startTime?: string;
 
   @IsOptional()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+  @Matches(/^([01]\d|2[0-4]):([0-5]\d)$/)
   endTime?: string;
 }

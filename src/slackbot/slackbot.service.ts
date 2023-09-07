@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { WebClient } from '@slack/web-api';
 import slackbotConfig from 'src/config/slackbotConfig';
-import { Cron } from '@nestjs/schedule';
+import * as cron from 'node-cron';
 
 import { PrismaService } from '@/prisma/prisma.service';
 
@@ -12,7 +12,12 @@ export class SlackbotService {
     @Inject(slackbotConfig.KEY)
     readonly config: ConfigType<typeof slackbotConfig>,
     private readonly prismaService: PrismaService
-  ) {}
+  ) {
+    // 한국 시간에 맞춰서 매일 자정에 sendDailyRoomCount 함수를 실행합니다.
+    cron.schedule('0 0 * * *', this.sendDailyRoomCount.bind(this), {
+      timezone: 'Asia/Seoul',
+    });
+  }
   private async getTodayRoomCount(): Promise<number> {
     // 오늘 날짜의 시작과 끝 시간을 구합니다.
     const startOfDay = new Date();
@@ -44,7 +49,6 @@ export class SlackbotService {
     return;
   }
 
-  @Cron('0 0 * * *') // 매일 자정에 실행
   async sendDailyRoomCount() {
     const client = new WebClient(this.config.slackbotTk);
     const dailyRoomCount = await this.getTodayRoomCount();

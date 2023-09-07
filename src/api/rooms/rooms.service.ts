@@ -9,6 +9,7 @@ import uniq from 'lodash/uniq';
 import { customAlphabet } from 'nanoid';
 
 import { PrismaService } from '@/prisma/prisma.service';
+import { SlackbotService } from '@/slackbot/slackbot.service';
 
 import { CreateRoomDto } from './dto/create-room.dto';
 
@@ -16,7 +17,10 @@ const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6);
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly slackbotService: SlackbotService,
+    private readonly prismaService: PrismaService
+  ) {}
 
   private convertStringToDate(stringDate: string): Date {
     return new Date(stringDate);
@@ -57,7 +61,7 @@ export class RoomsService {
    */
   async create(createRoomDto: CreateRoomDto): Promise<Room> {
     this.validateDates(createRoomDto);
-
+    this.slackbotService.sendSlackCreateRoomNotific();
     return this.prismaService.room.create({
       data: {
         code: nanoid(),

@@ -7,19 +7,22 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { HealthModule } from '@/health/health.module';
 
 import { AuthModule } from './api/auth/auth.module';
+import { SlackbotModule } from './slackbot/slackbot.module';
 import authConfig from './config/authConfig';
+import slackbotConfig from './config/slackbotConfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [authConfig],
+      load: [authConfig, slackbotConfig],
     }),
     PrismaModule,
     RoomsModule,
     UsersModule,
     AuthModule,
     HealthModule,
+    SlackbotModule,
   ],
   controllers: [],
   providers: [],

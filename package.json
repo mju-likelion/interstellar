@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/schedule": "^3.0.3",
     "@prisma/client": "4.16.1",
     "@slack/web-api": "^6.9.0",
     "bcrypt": "^5.1.0",

@@ -9,7 +9,9 @@ async function bootstrap() {
     exclude: ['health-check'],
   });
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
+  app.enableCors({
+    origin: RegExp(process.env.CORS_ORIGIN),
+  });
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
